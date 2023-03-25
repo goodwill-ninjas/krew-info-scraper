@@ -1,0 +1,1 @@
+# krew-info scraper
