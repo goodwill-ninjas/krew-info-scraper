@@ -13,8 +13,8 @@ table = soup.find('table')
 
 """
 0 = stop
-1 = almost full
 11 = full (but not halted)
+1 = almost full
 2 = half
 3 = very low
 """
