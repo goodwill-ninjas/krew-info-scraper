@@ -49,12 +49,26 @@ def get_all_cities(rows):
     return cities
 
 
+def map_img_to_blood_type(img):
+    match img:
+        case "img/krew0.png":
+            return "STOP"
+        case "img/krew11.png":
+            return "ALMOST_FULL"
+        case "img/krew1.png":
+            return "OPTIMAL"
+        case "img/krew2.png":
+            return "MODERATE"
+        case "img/krew3.png":
+            return "CRITICAL"
+
+
 def get_bank_status(row):
     bank_status = []
     imgs = row.find_all('img')
     # print(imgs)
     for img in imgs:
-        bank_status.append(img.get('src'))
+        bank_status.append(map_img_to_blood_type(img.get('src')))
     # print(bank_status)
     return bank_status
 
@@ -77,24 +91,14 @@ output_json = {
     "url_src": response.url,
     "blood_banks": blood_banks
 }
-# bloodtype_i = 0
-# city_i = 0
-
-# print(cities)
-# print(blood_types)
 
 for count_cities, city in enumerate(cities):
-    # if city_i > 20 or bloodtype_i > 7:
-    #     break
     blood_banks[city] = {}
     for count_bd, blood_type in enumerate(blood_types):
         blood_banks[city][blood_type] = bank_status[count_bd][count_cities]
-    #     bloodtype_i += 1
-    # city_i += 1
 
 import json
-# print(blood_types_cities)
-print(json.dumps(output_json, indent=2))
+print(json.dumps(output_json, indent=2, ensure_ascii=False))
 
 # TODO: main function for clarity
 
