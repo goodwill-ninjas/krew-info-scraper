@@ -1,10 +1,10 @@
-import requests
+import requests, re
 from bs4 import BeautifulSoup
 
 url = 'https://krew.info/zapasy/'
 
 response = requests.get(url)
-print(response.status_code)
+# print(response.status_code)
 response.encoding = 'utf-8'
 
 soup = BeautifulSoup(response.text, 'html.parser')
@@ -58,6 +58,11 @@ def get_bank_status(row):
     # print(bank_status)
     return bank_status
 
+
+def get_datetime_modified(soup):
+    datetime_full = soup.find(string=re.compile("Aktualizacja stanu:")) # most reliable way for now, since this tag has no id
+    return re.search(r'\d.+', datetime_full).group(0)
+
 blood_types = get_all_blood_types(rows)
 cities = get_all_cities(rows)
 
@@ -66,7 +71,12 @@ bank_status = []
 for row in rows:
     bank_status.append(get_bank_status(row))
 
-blood_types_cities = {}
+blood_banks = {}
+output_json = {
+    "datetime_modified": get_datetime_modified(soup),
+    "url_src": response.url,
+    "blood_banks": blood_banks
+}
 # bloodtype_i = 0
 # city_i = 0
 
@@ -76,15 +86,15 @@ blood_types_cities = {}
 for count_cities, city in enumerate(cities):
     # if city_i > 20 or bloodtype_i > 7:
     #     break
-    blood_types_cities[city] = {}
+    blood_banks[city] = {}
     for count_bd, blood_type in enumerate(blood_types):
-        blood_types_cities[city][blood_type] = bank_status[count_bd][count_cities]
+        blood_banks[city][blood_type] = bank_status[count_bd][count_cities]
     #     bloodtype_i += 1
     # city_i += 1
 
 import json
 # print(blood_types_cities)
-print(json.dumps(blood_types_cities, indent=2))
+print(json.dumps(output_json, indent=2))
 
 # TODO: main function for clarity
 
