@@ -1,4 +1,5 @@
 import requests, re, json
+import dateutil.parser
 from bs4 import BeautifulSoup
 
 url = 'https://krew.info/zapasy/'
@@ -39,17 +40,15 @@ def map_img_to_blood_type(img):
 def get_bank_status(row):
     bank_status = []
     imgs = row.find_all('img')
-    # print(imgs)
     for img in imgs:
         bank_status.append(map_img_to_blood_type(img.get('src')))
-    # print(bank_status)
     return bank_status
 
 
 def get_datetime_modified(soup):
-    datetime_full = soup.find(
-        string=re.compile("Aktualizacja stanu:"))  # most reliable way for now, since this tag has no id
-    return re.search(r'\d.+', datetime_full).group(0)
+    datetime_full = re.search(r'\d.+', soup.find(string=re.compile("Aktualizacja stanu:"))).group(0) # most reliable way for now, since this tag has no id
+    datetime_iso8601 = (dateutil.parser.parse(datetime_full)).isoformat() + "+02"
+    return datetime_iso8601
 
 
 def main():
