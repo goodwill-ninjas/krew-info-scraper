@@ -52,34 +52,34 @@ def get_datetime_modified(soup):
 
 
 def main():
+    bank_status = []
+    blood_banks = {}
+    
     response = requests.get(url)
     response.encoding = 'utf-8'
 
     soup = BeautifulSoup(response.text, 'html.parser')
     table = soup.find('table')
 
-    for blood_banks in table.find_all('tbody'):
-        rows = blood_banks.find_all('tr')
+    for tbody_blood_banks in table.find_all('tbody'):
+        rows = tbody_blood_banks.find_all('tr')
 
     blood_types = get_all_blood_types(rows)
     cities = get_all_cities(rows)
 
-    bank_status = []
-
     for row in rows:
         bank_status.append(get_bank_status(row))
-
-    blood_banks = {}
-    output_json = {
-        "datetime_modified": get_datetime_modified(soup),
-        "url_src": response.url,
-        "blood_banks": blood_banks
-    }
 
     for count_cities, city in enumerate(cities):
         blood_banks[city] = {}
         for count_bd, blood_type in enumerate(blood_types):
             blood_banks[city][blood_type] = bank_status[count_bd][count_cities]
+    
+    output_json = {
+        "datetime_modified": get_datetime_modified(soup),
+        "url_src": response.url,
+        "blood_banks": blood_banks
+    }
 
     print(json.dumps(output_json, indent=2, ensure_ascii=False))
 
