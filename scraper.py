@@ -1,9 +1,14 @@
-import requests, re, json
+import requests, re, json, os
 import dateutil.parser
 from bs4 import BeautifulSoup
 
 source_url = 'https://krew.info/zapasy/'
-api_url = 'https://api.pre.gwn.adamjurkiewicz.com/api/blood-centers/status'
+
+try:
+    api_url = os.environ['API_URL']
+    api_token = os.environ['API_TOKEN']
+except KeyError as e:
+    raise KeyError("Please set the environment variable {}".format(e))
 
 # ['0 Rh-', '0 Rh+', 'A Rh-', 'A Rh+', 'B Rh-', 'B Rh+', 'AB Rh-', 'AB Rh+']
 def get_all_blood_types(rows):
@@ -52,8 +57,10 @@ def get_datetime_modified(soup):
     return datetime_iso8601
 
 
-def post_to_api(json):
-    response = requests.post(api_url, json=json)
+def post_to_api(json, api_token):
+    auth_header = {'Authorization': 'Token value="' + api_token + '"'}
+
+    response = requests.post(api_url, json=json,headers=auth_header)
     print("Response status code:", response.status_code)
     if response.text:
         print("Response text:", response.text)
@@ -92,7 +99,7 @@ def main():
 
     print("Output JSON:\n", json.dumps(output_json, indent=2, ensure_ascii=False))
     print("Posting to API...")
-    post_to_api(output_json)
+    post_to_api(output_json, api_token)
 
 if __name__ == "__main__":
     main()
