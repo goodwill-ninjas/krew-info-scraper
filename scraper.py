@@ -58,8 +58,7 @@ def get_datetime_modified(soup):
 
 
 def post_to_api(json, api_token):
-    auth_header = {'Authorization': 'Token value="' + api_token + '"'}
-
+    auth_header = {'Authorization': 'Token ' + api_token}
     response = requests.post(api_url, json=json,headers=auth_header)
     print("Response status code:", response.status_code)
     if response.text:
