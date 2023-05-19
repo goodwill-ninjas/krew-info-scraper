@@ -98,7 +98,7 @@ def main():
     }
 
     print("Output JSON:\n", json.dumps(output_json, indent=2, ensure_ascii=False))
-    print("Posting to API...")
+    print("Posting to API (", api_url, ")...")
     post_to_api(output_json, api_token)
 
 if __name__ == "__main__":
