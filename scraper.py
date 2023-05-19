@@ -16,6 +16,7 @@ def get_all_blood_types(rows):
 # ['Białystok', 'Bydgoszcz', 'Gdańsk', 'Kalisz', 'Katowice', 'Kielce', 'Kraków', 'Lublin', 'Łódź', 'Olsztyn', 'Opole', 'Poznań', 'Racibórz', 'Radom', 'Rzeszów', 'Słupsk', 'Szczecin', 'Wałbrzych', 'Warszawa', 'Wrocław', 'Zielona Góra']
 def get_all_cities(rows):
     cities = []
+    imgs = []
     for row in rows:
         imgs = row.find_all('img')
     for img in imgs:
@@ -54,6 +55,7 @@ def get_datetime_modified(soup):
 def main():
     bank_status = []
     blood_banks = {}
+    rows = []
     
     response = requests.get(url)
     response.encoding = 'utf-8'
