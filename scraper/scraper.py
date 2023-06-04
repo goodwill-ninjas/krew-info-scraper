@@ -4,6 +4,9 @@ from bs4 import BeautifulSoup
 import azure.functions as func
 
 source_url = 'https://krew.info/zapasy/'
+api_url = os.environ["API_URL"]
+api_token = os.environ["API_TOKEN"]
+
 root = logging.getLogger()
 root.setLevel(logging.DEBUG)
 
@@ -57,7 +60,7 @@ def get_bank_status(row):
 
 def get_datetime_modified(soup):
     datetime_full = re.search(r'\d.+', soup.find(string=re.compile("Aktualizacja stanu:"))).group(0) # most reliable way for now, since this tag has no id
-    datetime_iso8601 = (dateutil.parser.parse(datetime_full)).isoformat() + "+02"
+    datetime_iso8601 = (dateutil.parser.parse(datetime_full)).isoformat()
     return datetime_iso8601
 
 
@@ -78,7 +81,7 @@ def main(everyTwelveHours: func.TimerRequest) -> None:
     blood_banks = {}
     rows = []
     
-    response = requests.get(url)
+    response = requests.get(source_url)
     response.encoding = 'utf-8'
 
     soup = BeautifulSoup(response.text, 'html.parser')
