@@ -1,0 +1,11 @@
+{
+  "scriptFile": "scraper.py",
+  "bindings": [
+    {
+      "name": "everyTwelveHours",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "0 0 0,12 * * *"
+    }
+  ]
+}

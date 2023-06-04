@@ -1,8 +1,17 @@
-import requests, re, json
+import requests, re, json, os, datetime, logging, sys
 import dateutil.parser
 from bs4 import BeautifulSoup
+import azure.functions as func
 
-url = 'https://krew.info/zapasy/'
+source_url = 'https://krew.info/zapasy/'
+root = logging.getLogger()
+root.setLevel(logging.DEBUG)
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+root.addHandler(handler)
 
 
 # ['0 Rh-', '0 Rh+', 'A Rh-', 'A Rh+', 'B Rh-', 'B Rh+', 'AB Rh-', 'AB Rh+']
@@ -52,7 +61,19 @@ def get_datetime_modified(soup):
     return datetime_iso8601
 
 
-def main():
+def post_to_api(json, api_token):
+    auth_header = {'Authorization': 'Token ' + api_token}
+    response = requests.post(api_url, json=json,headers=auth_header)
+    logging.info("Response status code: %s", response.status_code)
+    if response.text:
+        logging.info("Response text: %s", response.text)
+
+
+def main(everyTwelveHours: func.TimerRequest) -> None:
+    utc_timestamp = datetime.datetime.utcnow().replace(
+        tzinfo=datetime.timezone.utc).isoformat()
+    logging.info('Python timer trigger function ran at %s', utc_timestamp)
+    
     bank_status = []
     blood_banks = {}
     rows = []
@@ -83,8 +104,10 @@ def main():
         "blood_banks": blood_banks
     }
 
-    print(json.dumps(output_json, indent=2, ensure_ascii=False))
-
+    logging.debug("Output JSON:\n")
+    logging.debug(json.dumps(output_json, indent=2, ensure_ascii=False))
+    logging.info("Posting to API (%s)...", api_url)
+    post_to_api(output_json, api_token)
 
 if __name__ == "__main__":
-    main()
+    main(everyTwelveHours=None)
