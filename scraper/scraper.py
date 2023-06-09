@@ -1,6 +1,7 @@
 import requests, re, json, os, datetime, logging, sys
 import dateutil.parser
 from bs4 import BeautifulSoup
+from datetime import datetime
 import azure.functions as func
 
 source_url = 'https://krew.info/zapasy/'
@@ -60,8 +61,9 @@ def get_bank_status(row):
 
 def get_datetime_modified(soup):
     datetime_full = re.search(r'\d.+', soup.find(string=re.compile("Aktualizacja stanu:"))).group(0) # most reliable way for now, since this tag has no id
-    datetime_iso8601 = (dateutil.parser.parse(datetime_full)).isoformat()
-    return datetime_iso8601
+    parsed_datetime = datetime.strptime(datetime_full, "%d.%m.%Y %H:%M")
+    formatted_datetime = parsed_datetime.strftime("%Y-%m-%dT%H:%M:%S")
+    return formatted_datetime
 
 
 def post_to_api(json, api_token):
@@ -73,9 +75,7 @@ def post_to_api(json, api_token):
 
 
 def main(everyTwelveHours: func.TimerRequest) -> None:
-    utc_timestamp = datetime.datetime.utcnow().replace(
-        tzinfo=datetime.timezone.utc).isoformat()
-    logging.info('Python timer trigger function ran at %s', utc_timestamp)
+    logging.info('Scraper started...')
     
     bank_status = []
     blood_banks = {}
