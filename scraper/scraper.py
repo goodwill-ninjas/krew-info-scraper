@@ -1,8 +1,21 @@
-import requests, re, json, os
+import requests, re, json, os, datetime, logging, sys
 import dateutil.parser
 from bs4 import BeautifulSoup
+from datetime import datetime
+import azure.functions as func
 
 source_url = 'https://krew.info/zapasy/'
+api_url = os.environ["API_URL"]
+api_token = os.environ["API_TOKEN"]
+
+root = logging.getLogger()
+root.setLevel(logging.DEBUG)
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+root.addHandler(handler)
 
 try:
     api_url = os.environ['API_URL']
@@ -53,19 +66,22 @@ def get_bank_status(row):
 
 def get_datetime_modified(soup):
     datetime_full = re.search(r'\d.+', soup.find(string=re.compile("Aktualizacja stanu:"))).group(0) # most reliable way for now, since this tag has no id
-    datetime_iso8601 = (dateutil.parser.parse(datetime_full)).isoformat() + "+02:00"
-    return datetime_iso8601
+    parsed_datetime = datetime.strptime(datetime_full, "%d.%m.%Y %H:%M")
+    formatted_datetime = parsed_datetime.strftime("%Y-%m-%dT%H:%M:%S")
+    return formatted_datetime
 
 
 def post_to_api(json, api_token):
     auth_header = {'Authorization': 'Token ' + api_token}
     response = requests.post(api_url, json=json,headers=auth_header)
-    print("Response status code:", response.status_code)
+    logging.info("Response status code: %s", response.status_code)
     if response.text:
-        print("Response text:", response.text)
+        logging.info("Response text: %s", response.text)
 
 
-def main():
+def main(everyTwelveHours: func.TimerRequest) -> None:
+    logging.info('Scraper started...')
+    
     bank_status = []
     blood_banks = {}
     rows = []
@@ -96,9 +112,10 @@ def main():
         "blood_banks": blood_banks
     }
 
-    print("Output JSON:\n", json.dumps(output_json, indent=2, ensure_ascii=False))
-    print("Posting to API (", api_url, ")...")
+    logging.debug("Output JSON:\n")
+    logging.debug(json.dumps(output_json, indent=2, ensure_ascii=False))
+    logging.info("Posting to API (%s)...", api_url)
     post_to_api(output_json, api_token)
 
 if __name__ == "__main__":
-    main()
+    main(everyTwelveHours=None)
