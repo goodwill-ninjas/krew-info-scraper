@@ -17,6 +17,11 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 handler.setFormatter(formatter)
 root.addHandler(handler)
 
+try:
+    api_url = os.environ['API_URL']
+    api_token = os.environ['API_TOKEN']
+except KeyError as e:
+    raise KeyError("Please set the environment variable {}".format(e))
 
 # ['0 Rh-', '0 Rh+', 'A Rh-', 'A Rh+', 'B Rh-', 'B Rh+', 'AB Rh-', 'AB Rh+']
 def get_all_blood_types(rows):
@@ -81,10 +86,10 @@ def main(everyTwelveHours: func.TimerRequest) -> None:
     blood_banks = {}
     rows = []
     
-    response = requests.get(source_url)
-    response.encoding = 'utf-8'
+    source_response = requests.get(source_url)
+    source_response.encoding = 'utf-8'
 
-    soup = BeautifulSoup(response.text, 'html.parser')
+    soup = BeautifulSoup(source_response.text, 'html.parser')
     table = soup.find('table')
 
     for tbody_blood_banks in table.find_all('tbody'):
@@ -103,7 +108,7 @@ def main(everyTwelveHours: func.TimerRequest) -> None:
     
     output_json = {
         "datetime_modified": get_datetime_modified(soup),
-        "url_src": response.url,
+        "url_src": source_response.url,
         "blood_banks": blood_banks
     }
 
