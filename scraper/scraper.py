@@ -50,10 +50,16 @@ def map_img_to_blood_type(img):
             return "ALMOST_FULL"
         case "img/krew1.png":
             return "OPTIMAL"
+        case "img/krew22.png":
+            return "HIGH"
         case "img/krew2.png":
             return "MODERATE"
         case "img/krew3.png":
             return "CRITICAL"
+        case "img/krew4.png":
+            return "DEPLETED"
+        case _:
+            return "UNKNOWN"
 
 
 def get_bank_status(row):

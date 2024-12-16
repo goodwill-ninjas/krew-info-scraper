@@ -4,13 +4,16 @@
 
 The krew.info service contains an HTML table matrix with cities (regional blood banks) and blood types (with destinction of their status). The scraper will produce the following output:
 
-| Image value  | Blood banks indication |
-| ------------ | ---------------------- | 
-| `krew0.png`  | `STOP`                 |
-| `krew11.png` | `ALMOST_FULL`          |
-| `krew1.png`  | `OPTIMAL`              |
-| `krew2.png`  | `MODERATE`             |
-| `krew3.png`  | `CRITICAL`             |
+| Image value    | Blood banks indication |
+| -------------- | ---------------------- | 
+| `krew0.png`    | `STOP`                 |
+| `krew11.png`   | `ALMOST_FULL`          |
+| `krew1.png`    | `OPTIMAL`              |
+| `krew22.png`   | `HIGH`                 |
+| `krew2.png`    | `MODERATE`             |
+| `krew3.png`    | `CRITICAL`             |
+| `krew4.png`    | `DEPLETED`             |
+|  Anything else | `UNKNOWN`              |
 
 ```json
 {
